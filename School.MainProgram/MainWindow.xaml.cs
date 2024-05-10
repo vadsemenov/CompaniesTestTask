@@ -28,11 +28,11 @@ namespace School.MainProgram
             using (var context = new SchoolDbContext())
             {
                 context.Database.EnsureCreated();
-
+            
                 context.Students.Add(new Student { FirstName = "sdfsdf", LastName = "sdfsdff" });
-
+            
                 context.SaveChanges();
-
+            
                 var students = context.Students.ToList();
             }
         }
