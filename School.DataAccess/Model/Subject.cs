@@ -8,6 +8,6 @@ namespace School.DataAccess.Model
 
         public string Name { get; set; } 
 
-        public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
+        // public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
     }
 }

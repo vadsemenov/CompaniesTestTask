@@ -6,10 +6,10 @@ namespace School.DataAccess.Model
     {
         public int Id { get; set; }
 
-        public string FirstName { get; set; }
- 
-        public string LastName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
 
-        public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
+        public string LastName { get; set; } = string.Empty;
+
+        // public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
      }
 }
