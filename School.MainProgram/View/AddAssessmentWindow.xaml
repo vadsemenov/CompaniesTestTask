@@ -7,7 +7,7 @@
         xmlns:viewModel="clr-namespace:School.MainProgram.ViewModel"
         d:DataContext="{d:DesignInstance Type=viewModel:SchoolViewModel}"
         mc:Ignorable="d"
-        Title="Добавить оценку" Height="200" Width="300"
+        Title="Добавить оценку" Height="250" Width="300"
         Name = "AddAssessmentWdw">
     <Grid>
         <Grid.RowDefinitions>
@@ -46,7 +46,7 @@
             </ComboBox>
             
             <TextBlock Text="Оценка"/>
-            <!-- <TextBox  Text="{Binding }"/> -->
+
             <TextBox Name ="MarkBlock">
                 <TextBox.Text>
                     <Binding Path="Mark">

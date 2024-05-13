@@ -7,43 +7,98 @@
         xmlns:viewModel="clr-namespace:School.MainProgram.ViewModel"
         d:DataContext="{d:DesignInstance Type=viewModel:SchoolViewModel}"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <!-- <Grid> -->
+        Title="MainWindow" Height="450" Width="800" WindowStartupLocation="CenterScreen">
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40px" />
-            <RowDefinition />
-            <RowDefinition />
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40px"/>
             <RowDefinition Height="60px" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <ComboBox Grid.Row="0" Grid.Column="0"
-                      ItemsSource="{Binding Path=Subjects}"
+
+        <StackPanel Grid.Row="0" 
+                    Grid.Column="0" 
+                    Grid.ColumnSpan="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+            <Label Content="Выберите предмет:"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   FontSize="14"/>
+            <ComboBox ItemsSource="{Binding Path=Subjects}"
                       DisplayMemberPath="Name"
                       SelectedValuePath="Name"
-                      SelectedItem="{Binding Path=CurrentSubject}"/>
+                      SelectedItem="{Binding Path=CurrentSubject}"
+                      HorizontalContentAlignment="Center"
+                      VerticalContentAlignment="Center"
+                      FontSize="14"
+                      Width="300px"/>
+        </StackPanel>
 
-        <ComboBox Grid.Row="0" Grid.Column="1"
-                      ItemsSource="{Binding Path=Students}"
-                      SelectedItem="{Binding Path=CurrentStudent}">
-            <ComboBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock>
-                        <TextBlock.Text>
-                            <MultiBinding StringFormat="{}{0} {1}">
-                                <Binding Path="LastName"/>
-                                <Binding Path="FirstName"/>
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
+        <DataGrid x:Name="SelectedNotesDataGrid" 
+                  ItemsSource="{Binding Assessments}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  GridLinesVisibility="Horizontal"
+                  Grid.Row="1"
+                  Grid.Column="0"
+                  Grid.ColumnSpan="2">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding SubjectName}" Width="0.25*"  Header="Предмет">
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment"
+                                    Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding StudentLastName}" Width="0.25*"  Header="Фамилия студента">
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment"
+                                    Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding StudentFirstName}" Width="0.25*"  Header="Имя студента">
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment"
+                                    Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding SubjectMark}" Width="0.25*"  Header="Оценка">
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment"
+                                    Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
 
-        <Grid Grid.Row="3" Grid.ColumnSpan="3">
+        <StackPanel Grid.Row="2"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+            <Label Content="Средняя оценка по предмету:" FontSize="18"/>
+            <TextBlock FontSize="18"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Text ="{Binding AverageMark}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="0.3*"/>
                 <ColumnDefinition Width="0.3*"/>
@@ -54,38 +109,6 @@
             <Button Grid.Column="1" Content="Добавить предмет" Command="{Binding OpenAddNewSubjectWindow}"/>
             <Button Grid.Column="2" Content="Добавить оценку" Command="{Binding OpenAddNewAssessmentWindow}"/>
         </Grid>
-
-
-        <!-- SelectedValue="{Binding Path=CountryValue}" -->
-
-        <!-- <TextBox x:Name ="MainTextBox" FontSize="18" Background="Beige"  Text="{Binding StudentFirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalScrollBarVisibility ="Auto"  TextWrapping="Wrap" AcceptsReturn="True" Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Padding="10"/> -->
-
-        <!-- <TextBox x:Name ="SearchTextBox" FontSize="14" Background="Chartreuse" Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Margin ="10"  VerticalScrollBarVisibility ="Auto"  TextWrapping="Wrap" AcceptsReturn="True" Grid.Row="0" Grid.Column="1"/> -->
-
-        <!--     <DataGrid x:Name="SelectedNotesDataGrid" SelectedItem="{Binding SelectedNote}" ItemsSource="{Binding Notes}"  AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"> -->
-        <!--         <DataGrid.Columns> -->
-        <!--             <DataGridTextColumn Binding="{Binding TextMessage}" Width="1*"  Header="Заметки из базы"> -->
-        <!--                 <DataGridTextColumn.HeaderStyle> -->
-        <!--                     <Style TargetType="DataGridColumnHeader"> -->
-        <!--                         <Setter Property="HorizontalContentAlignment" -->
-        <!--                     Value="Center" /> -->
-        <!--                     </Style> -->
-        <!--                 </DataGridTextColumn.HeaderStyle> -->
-        <!--             </DataGridTextColumn> -->
-        <!--         </DataGrid.Columns> -->
-        <!--     </DataGrid> -->
-        <!-- -->
-        <!--     <Grid Grid.Row="3" Grid.ColumnSpan="2"> -->
-        <!--         <Grid.ColumnDefinitions> -->
-        <!--             <ColumnDefinition Width="0.3*"/> -->
-        <!--             <ColumnDefinition Width="0.3*"/> -->
-        <!--         </Grid.ColumnDefinitions> -->
-        <!-- -->
-        <!--         <Button Grid.Column="0" Content="Скопировать текст" Command="{Binding CopyMainText}"/> -->
-        <!-- -->
-        <!--         <Button Grid.Column="1" Content="Вставить текст замечания" Command="{Binding InsertSelectedNote}"/> -->
-        <!--     </Grid> -->
-        <!-- </Grid> -->
 
     </Grid>
 </Window>

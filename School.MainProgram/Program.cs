@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Hosting;
 using System;
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using School.DataAccess.Model;
+using School.DataAccess.UnitOfWork;
 using School.MainProgram.View;
 using School.MainProgram.ViewModel;
 
@@ -25,6 +27,15 @@ namespace School.MainProgram
                     services.AddTransient<AddAssessmentWindow>();
 
                     services.AddDbContext<SchoolDbContext>();
+
+                    services.AddSingleton<IUnitOfWork>(p =>
+                    {
+                        var dbContext = p.GetRequiredService<SchoolDbContext>();
+
+                        // var students = dbContext.Students.ToList();
+
+                        return new UnitOfWork(dbContext);
+                    });
                 })
                 .Build();
 

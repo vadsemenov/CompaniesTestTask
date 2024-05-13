@@ -8,22 +8,57 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
+using School.DataAccess.Repositories;
+using School.DataAccess.UnitOfWork;
 
 namespace School.MainProgram.ViewModel;
 
 public class SchoolViewModel : INotifyPropertyChanged
 {
-    private ObservableCollection<Subject> _subjects = new();
+    private ObservableCollection<AverageAssessment>? _assessments = new();
 
-    public Subject? CurrentSubject { get; set; }
+    public ObservableCollection<AverageAssessment> Assessments
+    {
+        get
+        {
+            if (CurrentSubject != null)
+            {
+                _assessments =
+                    new ObservableCollection<AverageAssessment>(
+                        _assessmentRepository.GetAverageAssessments(CurrentSubject));
+            }
+
+            return _assessments!;
+        }
+    }
+
+    public double AverageMark => !_assessments!.Any() ? 0 : _assessments!.Average(a => a.SubjectMark);
+
+    private Subject? _currentSubject;
+
+    public Subject? CurrentSubject
+    {
+        get => _currentSubject;
+        set
+        {
+            _currentSubject = value;
+
+            _assessments =
+                new ObservableCollection<AverageAssessment>(_assessmentRepository.GetAverageAssessments(value));
+
+            OnPropertyChanged(nameof(AverageMark));
+            OnPropertyChanged(nameof(Assessments));
+            OnPropertyChanged(nameof(CurrentSubject));
+        }
+    }
+
+    private ObservableCollection<Subject> _subjects = new();
 
     public ObservableCollection<Subject> Subjects
     {
         get
         {
-            _subjects.Clear();
-
-            _subjects = new ObservableCollection<Subject>(_dbContext!.Subjects.ToList());
+            _subjects = new ObservableCollection<Subject>(_subjectRepository.GetAll().ToList());
 
             return _subjects;
         }
@@ -31,25 +66,31 @@ public class SchoolViewModel : INotifyPropertyChanged
 
     private ObservableCollection<Student> _students = new();
 
-    public Student? CurrentStudent { get; set; }
+    private Student? _student;
+
+    public Student? CurrentStudent
+    {
+        get => _student;
+        set
+        {
+            _student = value;
+            OnPropertyChanged(nameof(CurrentStudent));
+        }
+    }
 
     public ObservableCollection<Student> Students
     {
         get
         {
-            _students.Clear();
-
-            _students = new ObservableCollection<Student>(_dbContext!.Students.ToList());
-
-            // OnPropertyChanged(nameof(Students));
+            _students = new ObservableCollection<Student>(_studentRepository.GetAll().ToList());
 
             return _students;
         }
     }
 
-    public string StudentFirstName { get; set; } = "asdfasdf";
+    public string StudentFirstName { get; set; } = string.Empty;
 
-    public string StudentLastName { get; set; } = "asdfasdf";
+    public string StudentLastName { get; set; } = string.Empty;
 
     public string SubjectName { get; set; } = string.Empty;
 
@@ -57,30 +98,54 @@ public class SchoolViewModel : INotifyPropertyChanged
 
     private readonly IServiceProvider _services;
 
-    private readonly SchoolDbContext _dbContext;
+    private readonly IAssessmentRepository _assessmentRepository;
+
+    private readonly IStudentRepository _studentRepository;
+
+    private readonly ISubjectRepository _subjectRepository;
+
+    private readonly IUnitOfWork _unitOfWork;
 
     public SchoolViewModel(IServiceProvider serviceProvider,
-        SchoolDbContext dbContext)
+        SchoolDbContext dbContext,
+        IUnitOfWork unitOfWork)
     {
+        _unitOfWork = unitOfWork;
+
+        _assessmentRepository = unitOfWork.GetRepository<IAssessmentRepository>();
+
+        _studentRepository = unitOfWork.GetRepository<IStudentRepository>();
+
+        _subjectRepository = unitOfWork.GetRepository<ISubjectRepository>();
+
         _services = serviceProvider;
 
-        _dbContext = dbContext;
-
-        AddFakeSubjects(_dbContext);
+        AddFakeObjects();
     }
 
-    public void AddFakeSubjects(SchoolDbContext context)
+    public void AddFakeObjects()
     {
-        context.Database.EnsureDeleted();
-        context.Database.EnsureCreated();
+        var student1 = new Student { FirstName = "Иван", LastName = "Иванов" };
 
-        context.Students.AddRange(new Student { FirstName = "Иван", LastName = "Иванов" }, new Student { FirstName = "Иван", LastName = "Иванов" });
+        var student2 = new Student { FirstName = "Петр", LastName = "Петров" };
 
-        context.Subjects.AddRange(new Subject { Name = "sdfsdf" }, new Subject { Name = "sdfsdf" });
+        _studentRepository.Create(new Collection<Student>() { student1, student2 });
+        _unitOfWork.Save();
 
-        var assdfsdf = context.Assessments.ToList();
+        var subject1 = new Subject { Name = "Информатика" };
 
-        context.SaveChanges();
+        var subject2 = new Subject { Name = "Физика" };
+
+        _subjectRepository.Create(new Collection<Subject>() { subject1, subject2 });
+        _unitOfWork.Save();
+
+        var assessment1 = new Assessment { StudentId = student1.Id, SubjectId = subject1.Id, Mark = 3 };
+        var assessment2 = new Assessment { StudentId = student2.Id, SubjectId = subject1.Id, Mark = 4 };
+        var assessment3 = new Assessment { StudentId = student2.Id, SubjectId = subject2.Id, Mark = 5 };
+
+        _assessmentRepository.Create(new Collection<Assessment> { assessment1, assessment2, assessment3 });
+
+        _unitOfWork.Save();
     }
 
     public RelayCommand AddNewStudent
@@ -95,20 +160,19 @@ public class SchoolViewModel : INotifyPropertyChanged
                 {
                     MessageBox.Show("Должны быть введены имя и фамилия", "Ошибка!");
                 }
-                else
+
                 {
                     var student = new Student { FirstName = StudentFirstName, LastName = StudentLastName };
 
-                    _dbContext!.Students.Add(student);
+                    _studentRepository.Create(student);
 
                     _students.Add(student);
 
-                    _dbContext.SaveChanges();
+                    _unitOfWork.Save();
 
                     window?.Close();
 
-                    // OnPropertyChanged();
-                    // OnPropertyChanged(nameof(Students));
+                    OnPropertyChanged(nameof(Students));
                 }
             });
         }
@@ -130,16 +194,17 @@ public class SchoolViewModel : INotifyPropertyChanged
                 {
                     var subject = new Subject { Name = SubjectName };
 
-                    _dbContext!.Subjects.Add(subject);
+                    _subjectRepository.Create(subject);
 
                     _subjects.Add(subject);
 
-                    _dbContext.SaveChanges();
+                    _unitOfWork.Save();
 
                     window?.Close();
 
-                    // OnPropertyChanged();
-                    // OnPropertyChanged(nameof(Students));
+                    OnPropertyChanged(nameof(Subjects));
+                    OnPropertyChanged(nameof(AverageMark));
+                    OnPropertyChanged(nameof(CurrentSubject));
                 }
             });
         }
@@ -166,37 +231,22 @@ public class SchoolViewModel : INotifyPropertyChanged
                     var assessment = new Assessment
                     {
                         StudentId = CurrentStudent.Id,
-                        // Student = CurrentStudent,
                         SubjectId = CurrentSubject.Id,
-                        // Subject = CurrentSubject,
                         Mark = Mark
                     };
 
-                    _dbContext!.Assessments.Add(assessment);
+                    _assessmentRepository.Create(assessment);
 
-                    _dbContext.SaveChanges();
-
-                    CurrentStudent = null;
-                    CurrentSubject = null;
+                    _unitOfWork.Save();
 
                     Mark = 0;
 
                     window?.Close();
-                }
 
-                // if (!string.IsNullOrEmpty(SubjectName))
-                // {
-                //     var subject = new Subject { Name = SubjectName };
-                //
-                //     _dbContext!.Subjects.Add(subject);
-                //
-                //     _subjects.Add(subject);
-                //
-                //     window?.Close();
-                //
-                //     // OnPropertyChanged();
-                //     // OnPropertyChanged(nameof(Students));
-                // }
+                    OnPropertyChanged(nameof(AverageMark));
+                    OnPropertyChanged(nameof(Assessments));
+                    OnPropertyChanged(nameof(CurrentSubject));
+                }
             });
         }
     }
@@ -244,7 +294,7 @@ public class SchoolViewModel : INotifyPropertyChanged
     {
         window.Owner = Application.Current.MainWindow;
         window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-        window.Show();
+        window.ShowDialog();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
