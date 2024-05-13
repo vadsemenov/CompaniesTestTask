@@ -7,7 +7,7 @@
         xmlns:viewModel="clr-namespace:School.MainProgram.ViewModel"
         d:DataContext="{d:DesignInstance Type=viewModel:SchoolViewModel}"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" WindowStartupLocation="CenterScreen">
+        Title="Контроль успеваемости" Height="450" Width="800" WindowStartupLocation="CenterScreen">
 
     <Grid>
         <Grid.RowDefinitions>

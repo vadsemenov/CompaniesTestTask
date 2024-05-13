@@ -6,6 +6,7 @@ using School.DataAccess.Model;
 using School.DataAccess.UnitOfWork;
 using School.MainProgram.View;
 using School.MainProgram.ViewModel;
+using Microsoft.EntityFrameworkCore;
 
 namespace School.MainProgram
 {
@@ -30,9 +31,11 @@ namespace School.MainProgram
 
                     services.AddSingleton<IUnitOfWork>(p =>
                     {
+                        //Можно просто создать new SchoolDbContext
                         var dbContext = p.GetRequiredService<SchoolDbContext>();
 
-                        // var students = dbContext.Students.ToList();
+                        dbContext.Database.EnsureDeleted();
+                        dbContext.Database.EnsureCreated();
 
                         return new UnitOfWork(dbContext);
                     });

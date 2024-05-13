@@ -2,11 +2,11 @@
 
 public class AverageAssessment
 {
-    public string SubjectName { get; set; } = string.Empty;
+    public string SubjectName { get; set; } = null!;
 
-    public string StudentFirstName { get; set; } = string.Empty;
+    public string StudentFirstName { get; set; } = null!;
 
-    public string StudentLastName { get; set; } = string.Empty;
+    public string StudentLastName { get; set; } = null!;
 
     public ushort SubjectMark { get; set; } 
 }

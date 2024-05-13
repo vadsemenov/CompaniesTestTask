@@ -107,7 +107,6 @@ public class SchoolViewModel : INotifyPropertyChanged
     private readonly IUnitOfWork _unitOfWork;
 
     public SchoolViewModel(IServiceProvider serviceProvider,
-        SchoolDbContext dbContext,
         IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
@@ -118,6 +117,7 @@ public class SchoolViewModel : INotifyPropertyChanged
 
         _subjectRepository = unitOfWork.GetRepository<ISubjectRepository>();
 
+        // Это конечно антипаттерн Service Locator, но иногда его используют
         _services = serviceProvider;
 
         AddFakeObjects();

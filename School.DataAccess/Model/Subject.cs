@@ -6,8 +6,7 @@ namespace School.DataAccess.Model
     {
         public int Id { get; set; }
 
-        public string Name { get; set; } 
+        public string Name { get; set; }  = null!;
 
-        // public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
     }
 }

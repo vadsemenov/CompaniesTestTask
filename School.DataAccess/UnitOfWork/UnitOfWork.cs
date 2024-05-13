@@ -19,9 +19,6 @@ namespace School.DataAccess.UnitOfWork
         public UnitOfWork(DbContext dbContext)
         {
             _dbContext = dbContext ?? throw new Exception("DbContext is null!");
-
-            _dbContext.Database.EnsureDeleted();
-            _dbContext.Database.EnsureCreated();
         }
 
         public T GetRepository<T>() where T : class, IRepository
